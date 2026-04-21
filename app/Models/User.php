@@ -79,6 +79,6 @@ class User extends Authenticatable
 
     public function getOpenTicketCountAttribute(): int
     {
-        return $this->assignedTickets()->where('status', 'open')->count();
+        return $this->assignedTickets()->whereIn('status', ['open', 'in_progress'])->count();
     }
 }

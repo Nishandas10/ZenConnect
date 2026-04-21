@@ -62,8 +62,8 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Technical Support', 'slug' => 'technical-support', 'description' => 'Technical issues and bugs'],
             ['name' => 'Billing', 'slug' => 'billing', 'description' => 'Billing and payment issues'],
             ['name' => 'Account', 'slug' => 'account', 'description' => 'Account related queries'],
-            ['name' => 'Feature Request', 'slug' => 'feature-request', 'description' => 'New feature suggestions'],
-            ['name' => 'General Inquiry', 'slug' => 'general-inquiry', 'description' => 'General questions'],
+            ['name' => 'Refund Request', 'slug' => 'refund-request', 'description' => 'Refund and return requests'],
+            ['name' => 'Product Enquiry', 'slug' => 'product-enquiry', 'description' => 'Product related questions'],
         ])->map(fn($cat) => Category::create($cat));
 
         // Create Tags

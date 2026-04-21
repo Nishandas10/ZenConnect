@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'react-toastify';
 
@@ -66,15 +66,10 @@ function Login() {
             </button>
           </form>
 
-          <p className="text-center mt-3 mb-0">
-            Don't have an account? <Link to="/register">Register</Link>
-          </p>
-
           <div className="mt-4 p-3 bg-light rounded">
             <small className="text-muted d-block mb-1 fw-bold">Demo Accounts:</small>
             <small className="text-muted d-block">Admin: admin@zenconnect.com / password</small>
             <small className="text-muted d-block">Agent: sarah@zenconnect.com / password</small>
-            <small className="text-muted d-block">User: john@example.com / password</small>
           </div>
         </div>
       </div>

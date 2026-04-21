@@ -86,6 +86,12 @@ export const agentsAPI = {
   getAll: () => api.get('/agents'),
 };
 
+// Tags API
+export const tagsAPI = {
+  getAll: () => api.get('/tags'),
+  updateTicketTags: (ticketId, tagIds) => api.put(`/tickets/${ticketId}`, { tags: tagIds }),
+};
+
 // Dashboard API
 export const dashboardAPI = {
   getData: () => api.get('/dashboard'),

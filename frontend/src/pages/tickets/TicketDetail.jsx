@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ticketsAPI, commentsAPI, agentsAPI, aiAPI } from '../../services/api';
+import { ticketsAPI, commentsAPI, agentsAPI, aiAPI, tagsAPI } from '../../services/api';
 import { useAuth } from '../../hooks/useAuth';
 import CommentList from '../../components/CommentList';
 import { toast } from 'react-toastify';
-import { FiArrowLeft, FiEdit2, FiTrash2, FiCpu, FiUserPlus, FiClock, FiPaperclip } from 'react-icons/fi';
+import { FiArrowLeft, FiEdit2, FiTrash2, FiCpu, FiUserPlus, FiClock, FiPaperclip, FiTag, FiX } from 'react-icons/fi';
 
 const statusColors = {
   open: 'primary',
@@ -27,6 +27,8 @@ function TicketDetail() {
 
   const [ticket, setTicket] = useState(null);
   const [agents, setAgents] = useState([]);
+  const [allTags, setAllTags] = useState([]);
+  const [tagLoading, setTagLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [commentLoading, setCommentLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState({ summarize: false, reply: false });
@@ -55,7 +57,10 @@ function TicketDetail() {
     if (isAdmin) {
       agentsAPI.getAll().then(res => setAgents(res.data.data || [])).catch(() => {});
     }
-  }, [fetchTicket, isAdmin]);
+    if (isAdmin || isAgent) {
+      tagsAPI.getAll().then(res => setAllTags(res.data.data || [])).catch(() => {});
+    }
+  }, [fetchTicket, isAdmin, isAgent]);
 
   const handleAddComment = async (data) => {
     setCommentLoading(true);
@@ -135,8 +140,29 @@ function TicketDetail() {
     }
   };
 
-  const handleSuggestReply = async () => {
-    setAiLoading(prev => ({ ...prev, reply: true }));
+  const handleToggleTag = async (tag) => {
+    const currentTagIds = ticket.tags?.map(t => t.id) || [];
+    const hasTag = currentTagIds.includes(tag.id);
+    const newTagIds = hasTag
+      ? currentTagIds.filter(id => id !== tag.id)
+      : [...currentTagIds, tag.id];
+    setTagLoading(true);
+    try {
+      await tagsAPI.updateTicketTags(ticket.id, newTagIds);
+      setTicket(prev => ({
+        ...prev,
+        tags: hasTag
+          ? prev.tags.filter(t => t.id !== tag.id)
+          : [...(prev.tags || []), tag],
+      }));
+    } catch {
+      toast.error('Failed to update tags');
+    } finally {
+      setTagLoading(false);
+    }
+  };
+
+  const handleSuggestReply = async () => {    setAiLoading(prev => ({ ...prev, reply: true }));
     try {
       const response = await aiAPI.suggestReply(ticket.id);
       setSuggestedReply(response.data.suggested_reply || '');
@@ -208,15 +234,50 @@ function TicketDetail() {
               <p style={{ whiteSpace: 'pre-wrap' }}>{ticket.description}</p>
 
               {/* Tags */}
-              {ticket.tags?.length > 0 && (
-                <div className="mt-2">
-                  {ticket.tags.map(tag => (
-                    <span key={tag.id} className="badge me-1" style={{ backgroundColor: tag.color, color: '#fff' }}>
-                      {tag.name}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <div className="mt-3">
+                {ticket.tags?.map(tag => (
+                  <span key={tag.id} className="badge me-1 mb-1" style={{ backgroundColor: tag.color, color: '#fff' }}>
+                    {tag.name}
+                    {(isAdmin || isAgent) && (
+                      <button
+                        className="btn-close btn-close-white ms-1"
+                        style={{ fontSize: '0.5rem', verticalAlign: 'middle' }}
+                        onClick={() => handleToggleTag(tag)}
+                        disabled={tagLoading}
+                        aria-label="Remove tag"
+                      />
+                    )}
+                  </span>
+                ))}
+                {(isAdmin || isAgent) && (
+                  <div className="dropdown d-inline-block ms-1">
+                    <button
+                      className="btn btn-outline-secondary btn-sm"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      disabled={tagLoading}
+                    >
+                      <FiTag className="me-1" />Add Tag
+                    </button>
+                    <ul className="dropdown-menu">
+                      {allTags.filter(t => !ticket.tags?.some(ct => ct.id === t.id)).map(tag => (
+                        <li key={tag.id}>
+                          <button
+                            className="dropdown-item d-flex align-items-center gap-2"
+                            onClick={() => handleToggleTag(tag)}
+                          >
+                            <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: tag.color, display: 'inline-block' }} />
+                            {tag.name}
+                          </button>
+                        </li>
+                      ))}
+                      {allTags.filter(t => !ticket.tags?.some(ct => ct.id === t.id)).length === 0 && (
+                        <li><span className="dropdown-item text-muted">All tags applied</span></li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
 
               {/* Attachments */}
               {ticket.attachments?.length > 0 && (

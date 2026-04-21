@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AIController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ExternalApiController;
+use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\TicketCommentController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\UserController;
@@ -35,6 +36,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Agents
     Route::get('/agents', [UserController::class, 'agents']);
+
+    // Tags
+    Route::get('/tags', [TagController::class, 'index']);
 
     // Notifications
     Route::get('/notifications', [UserController::class, 'notifications']);

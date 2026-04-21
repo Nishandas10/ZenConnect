@@ -16,7 +16,7 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'created_at' => $this->created_at->toISOString(),
             'open_ticket_count' => $this->when(
-                $this->relationLoaded('assignedTickets') || $this->role === 'agent',
+                $this->relationLoaded('assignedTickets') || $this->role === 'agent' || $this->role === 'admin',
                 fn() => $this->open_ticket_count
             ),
         ];

@@ -3,7 +3,6 @@ import { ToastContainer } from 'react-toastify';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import Layout from './components/Layout';
 import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
 import Dashboard from './pages/Dashboard';
 import TicketList from './pages/tickets/TicketList';
 import TicketCreate from './pages/tickets/TicketCreate';
@@ -38,7 +37,6 @@ function App() {
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
         <Routes>
           <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
-          <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
           <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
             <Route index element={<Dashboard />} />
             <Route path="tickets" element={<TicketList />} />

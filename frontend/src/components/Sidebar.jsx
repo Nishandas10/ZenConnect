@@ -7,16 +7,15 @@ function Sidebar() {
 
   const navItems = [
     { to: '/', icon: <FiHome />, label: 'Dashboard', roles: ['admin', 'agent'] },
-    { to: '/tickets', icon: <FiInbox />, label: 'Tickets', roles: ['admin', 'agent', 'user'] },
-    { to: '/tickets/create', icon: <FiPlusCircle />, label: 'New Ticket', roles: ['admin', 'agent', 'user'] },
+    { to: '/tickets', icon: <FiInbox />, label: 'Tickets', roles: ['admin', 'agent'], end: true },
+    { to: '/tickets/create', icon: <FiPlusCircle />, label: 'New Ticket', roles: ['admin', 'agent'] },
     { to: '/categories', icon: <FiGrid />, label: 'Categories', roles: ['admin'] },
     { to: '/agents', icon: <FiUsers />, label: 'Agents', roles: ['admin'] },
   ];
 
   const filteredItems = navItems.filter(item => {
     if (isAdmin) return item.roles.includes('admin');
-    if (isAgent) return item.roles.includes('agent');
-    return item.roles.includes('user');
+    return item.roles.includes('agent');
   });
 
   return (
@@ -32,7 +31,7 @@ function Sidebar() {
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === '/'}
+            end={item.end || item.to === '/'}
             className={({ isActive }) =>
               `d-flex align-items-center p-2 rounded text-decoration-none mb-1 ${
                 isActive ? 'bg-primary text-white' : 'text-white-50 hover-bg-secondary'
