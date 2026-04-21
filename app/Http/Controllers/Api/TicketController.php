@@ -190,4 +190,22 @@ class TicketController extends Controller
             'ticket' => new TicketResource($ticket),
         ]);
     }
+
+    public function updateTags(Request $request, Ticket $ticket): JsonResponse
+    {
+        $this->authorize('manageTags', $ticket);
+
+        $request->validate([
+            'tags' => 'present|array',
+            'tags.*' => 'exists:tags,id',
+        ]);
+
+        $ticket->tags()->sync($request->input('tags', []));
+        $ticket->load(['user', 'assignee', 'category', 'tags', 'attachments']);
+
+        return response()->json([
+            'message' => 'Tags updated successfully',
+            'ticket' => new TicketResource($ticket),
+        ]);
+    }
 }

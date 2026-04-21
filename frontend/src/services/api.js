@@ -89,7 +89,8 @@ export const agentsAPI = {
 // Tags API
 export const tagsAPI = {
   getAll: () => api.get('/tags'),
-  updateTicketTags: (ticketId, tagIds) => api.put(`/tickets/${ticketId}`, { tags: tagIds }),
+  addToTicket: (ticketId, name) => api.post('/tags', { ticket_id: ticketId, name }),
+  updateTicketTags: (ticketId, tagIds) => api.put(`/tickets/${ticketId}/tags`, { tags: tagIds }),
 };
 
 // Dashboard API

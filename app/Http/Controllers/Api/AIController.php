@@ -25,14 +25,16 @@ class AIController extends Controller
 
         $summary = $this->aiService->summarizeTicket($ticket->title, $ticket->description);
 
-        if ($summary) {
-            $ticket->update(['ai_summary' => $summary]);
+        if (!$summary) {
+            return response()->json(['message' => 'Failed to generate summary. Check logs for details.'], 500);
         }
+
+        $ticket->update(['ai_summary' => $summary]);
 
         return response()->json([
             'summary' => $summary,
-            'message' => $summary ? 'Summary generated successfully' : 'Failed to generate summary',
-        ], $summary ? 200 : 500);
+            'message' => 'Summary generated successfully',
+        ]);
     }
 
     public function suggestReply(Request $request): JsonResponse
@@ -53,9 +55,13 @@ class AIController extends Controller
 
         $reply = $this->aiService->suggestReply($ticket->title, $ticket->description, $comments);
 
+        if (!$reply) {
+            return response()->json(['message' => 'Failed to generate reply suggestion. Check logs for details.'], 500);
+        }
+
         return response()->json([
             'suggested_reply' => $reply,
-            'message' => $reply ? 'Reply suggestion generated successfully' : 'Failed to generate reply suggestion',
-        ], $reply ? 200 : 500);
+            'message' => 'Reply suggestion generated successfully',
+        ]);
     }
 }

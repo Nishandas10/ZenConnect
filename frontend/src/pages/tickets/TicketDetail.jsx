@@ -27,8 +27,9 @@ function TicketDetail() {
 
   const [ticket, setTicket] = useState(null);
   const [agents, setAgents] = useState([]);
-  const [allTags, setAllTags] = useState([]);
   const [tagLoading, setTagLoading] = useState(false);
+  const [tagInput, setTagInput] = useState('');
+  const [showTagInput, setShowTagInput] = useState(false);
   const [loading, setLoading] = useState(true);
   const [commentLoading, setCommentLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState({ summarize: false, reply: false });
@@ -57,10 +58,7 @@ function TicketDetail() {
     if (isAdmin) {
       agentsAPI.getAll().then(res => setAgents(res.data.data || [])).catch(() => {});
     }
-    if (isAdmin || isAgent) {
-      tagsAPI.getAll().then(res => setAllTags(res.data.data || [])).catch(() => {});
-    }
-  }, [fetchTicket, isAdmin, isAgent]);
+  }, [fetchTicket, isAdmin]);
 
   const handleAddComment = async (data) => {
     setCommentLoading(true);
@@ -140,23 +138,34 @@ function TicketDetail() {
     }
   };
 
-  const handleToggleTag = async (tag) => {
-    const currentTagIds = ticket.tags?.map(t => t.id) || [];
-    const hasTag = currentTagIds.includes(tag.id);
-    const newTagIds = hasTag
-      ? currentTagIds.filter(id => id !== tag.id)
-      : [...currentTagIds, tag.id];
+  const handleRemoveTag = async (tag) => {
+    const newTagIds = (ticket.tags?.map(t => t.id) || []).filter(id => id !== tag.id);
     setTagLoading(true);
     try {
       await tagsAPI.updateTicketTags(ticket.id, newTagIds);
-      setTicket(prev => ({
-        ...prev,
-        tags: hasTag
-          ? prev.tags.filter(t => t.id !== tag.id)
-          : [...(prev.tags || []), tag],
-      }));
+      setTicket(prev => ({ ...prev, tags: prev.tags.filter(t => t.id !== tag.id) }));
     } catch {
-      toast.error('Failed to update tags');
+      toast.error('Failed to remove tag');
+    } finally {
+      setTagLoading(false);
+    }
+  };
+
+  const handleAddTag = async (e) => {
+    e.preventDefault();
+    const name = tagInput.trim();
+    if (!name) return;
+    setTagLoading(true);
+    try {
+      const res = await tagsAPI.addToTicket(ticket.id, name);
+      const newTag = res.data.tag;
+      if (!ticket.tags?.some(t => t.id === newTag.id)) {
+        setTicket(prev => ({ ...prev, tags: [...(prev.tags || []), newTag] }));
+      }
+      setTagInput('');
+      setShowTagInput(false);
+    } catch {
+      toast.error('Failed to add tag');
     } finally {
       setTagLoading(false);
     }
@@ -242,7 +251,7 @@ function TicketDetail() {
                       <button
                         className="btn-close btn-close-white ms-1"
                         style={{ fontSize: '0.5rem', verticalAlign: 'middle' }}
-                        onClick={() => handleToggleTag(tag)}
+                        onClick={() => handleRemoveTag(tag)}
                         disabled={tagLoading}
                         aria-label="Remove tag"
                       />
@@ -250,32 +259,34 @@ function TicketDetail() {
                   </span>
                 ))}
                 {(isAdmin || isAgent) && (
-                  <div className="dropdown d-inline-block ms-1">
+                  showTagInput ? (
+                    <form onSubmit={handleAddTag} className="d-inline-flex align-items-center gap-1 ms-1">
+                      <input
+                        autoFocus
+                        type="text"
+                        className="form-control form-control-sm"
+                        style={{ width: 130 }}
+                        placeholder="Tag name..."
+                        value={tagInput}
+                        onChange={e => setTagInput(e.target.value)}
+                        disabled={tagLoading}
+                      />
+                      <button type="submit" className="btn btn-primary btn-sm" disabled={tagLoading || !tagInput.trim()}>
+                        {tagLoading ? <span className="spinner-border spinner-border-sm" /> : 'Add'}
+                      </button>
+                      <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => { setShowTagInput(false); setTagInput(''); }}>
+                        <FiX />
+                      </button>
+                    </form>
+                  ) : (
                     <button
-                      className="btn btn-outline-secondary btn-sm"
+                      className="btn btn-outline-secondary btn-sm ms-1"
                       type="button"
-                      data-bs-toggle="dropdown"
-                      disabled={tagLoading}
+                      onClick={() => setShowTagInput(true)}
                     >
                       <FiTag className="me-1" />Add Tag
                     </button>
-                    <ul className="dropdown-menu">
-                      {allTags.filter(t => !ticket.tags?.some(ct => ct.id === t.id)).map(tag => (
-                        <li key={tag.id}>
-                          <button
-                            className="dropdown-item d-flex align-items-center gap-2"
-                            onClick={() => handleToggleTag(tag)}
-                          >
-                            <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: tag.color, display: 'inline-block' }} />
-                            {tag.name}
-                          </button>
-                        </li>
-                      ))}
-                      {allTags.filter(t => !ticket.tags?.some(ct => ct.id === t.id)).length === 0 && (
-                        <li><span className="dropdown-item text-muted">All tags applied</span></li>
-                      )}
-                    </ul>
-                  </div>
+                  )
                 )}
               </div>
 

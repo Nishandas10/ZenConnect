@@ -54,6 +54,11 @@ class TicketPolicy
         return $user->isAdmin();
     }
 
+    public function manageTags(User $user, Ticket $ticket): bool
+    {
+        return $user->isAdmin() || $user->isAgent();
+    }
+
     public function comment(User $user, Ticket $ticket): bool
     {
         if ($user->isAdmin() || $user->isAgent()) {

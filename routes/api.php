@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tickets/{ticket}/assign', [TicketController::class, 'assign']);
     Route::post('/tickets/{ticket}/auto-assign', [TicketController::class, 'autoAssign']);
     Route::post('/tickets/{ticket}/self-assign', [TicketController::class, 'selfAssign']);
+    Route::put('/tickets/{ticket}/tags', [TicketController::class, 'updateTags']);
 
     // Comments
     Route::get('/tickets/{ticket}/comments', [TicketCommentController::class, 'index']);
@@ -39,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Tags
     Route::get('/tags', [TagController::class, 'index']);
+    Route::post('/tags', [TagController::class, 'store']);
 
     // Notifications
     Route::get('/notifications', [UserController::class, 'notifications']);

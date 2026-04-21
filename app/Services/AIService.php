@@ -13,7 +13,7 @@ class AIService
     public function __construct()
     {
         $this->apiKey = config('services.gemini.api_key', '');
-        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+        $this->baseUrl = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
     }
 
     public function summarizeTicket(string $title, string $description): ?string
