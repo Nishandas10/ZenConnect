@@ -29,8 +29,8 @@ class ExternalApiController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'priority' => 'sometimes|in:low,medium,high,urgent',
-            'category_id' => 'sometimes|exists:categories,id',
-            'category_slug' => 'sometimes|exists:categories,slug',
+            'category_id' => 'sometimes|nullable|exists:categories,id',
+            'category_slug' => 'sometimes|nullable|string|max:100',
             'customer_id' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
             'customer_name' => 'required|string|max:255',
@@ -131,7 +131,7 @@ class ExternalApiController extends Controller
         $tickets = $query->paginate($request->per_page ?? 10);
 
         return response()->json([
-            'tickets' => $tickets->map(function ($ticket) {
+            'tickets' => $tickets->getCollection()->map(function ($ticket) {
                 return [
                     'id' => $ticket->id,
                     'ticket_number' => $ticket->ticket_number,
